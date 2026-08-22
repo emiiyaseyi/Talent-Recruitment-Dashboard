@@ -25,7 +25,7 @@ Without Google Sheets credentials configured, the app falls back to bundled samp
 See `.env.local.example`. You'll need:
 
 - A Google Cloud **service account** with the Sheets API enabled, shared as Editor on your sheet (`GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GOOGLE_PRIVATE_KEY`, `GOOGLE_SHEET_ID`).
-- A Google OAuth client for sign-in (`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`), plus `AUTH_SECRET` (generate with `npx auth secret`) and `ALLOWED_EMAIL_DOMAIN` to restrict sign-in to your company domain.
+- A Google OAuth client for sign-in (`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`), plus `AUTH_SECRET` (generate with `npx auth secret`) and either `ALLOWED_EMAILS` (comma-separated exact addresses — use this for a personal Gmail account, since a domain restriction on `gmail.com` would let in anyone) or `ALLOWED_EMAIL_DOMAIN` (for a company Workspace domain).
 
 ### Sheet setup
 

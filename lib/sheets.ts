@@ -34,12 +34,49 @@ function parseOptionalNumberCell(value: unknown): number | null {
   return parseNumberCell(value);
 }
 
-/** Maps header text -> column index so row order in the sheet can change
- * without breaking the parser. */
+function normalizeHeader(h: string): string {
+  return h.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** Maps normalized header text -> column index so row order in the sheet can
+ * change without breaking the parser. */
 function headerIndex(headerRow: string[]): Map<string, number> {
   const map = new Map<string, number>();
-  headerRow.forEach((h, i) => map.set(h.trim(), i));
+  headerRow.forEach((h, i) => map.set(normalizeHeader(String(h ?? "")), i));
   return map;
+}
+
+/** Each field accepts several header spellings — the "clean" name from
+ * docs/01-data-schema.md and the literal text real sheets tend to already
+ * have (typos, casing, abbreviations included) — so sheet owners never have
+ * to rename existing columns just to match this code. */
+const HEADER_ALIASES: Record<string, string[]> = {
+  id: ["id"],
+  candidateName: ["candidate name", "name"],
+  role: ["role"],
+  bu: ["bu"],
+  requisitionStartDate: ["requisition start date", "requsition start date"],
+  offerStatus: ["offer status"],
+  offerExtendedDate: ["offer extended date"],
+  resumptionDate: ["resumption date"],
+  manualTimeToHireWeeks: [
+    "time to hire (week)",
+    "time to hire(week)",
+    "time to hire (weeks)",
+    "time to hire(weeks)",
+  ],
+  medicalCost: ["pre-employment medical test", "pre-employment medical test cost", "medical cost"],
+  airtime: ["airtime"],
+  feeding: ["feeding"],
+  manualTotalCost: ["total cost"],
+};
+
+function findColumn(idx: Map<string, number>, field: keyof typeof HEADER_ALIASES): number | undefined {
+  for (const alias of HEADER_ALIASES[field]) {
+    const i = idx.get(alias);
+    if (i != null) return i;
+  }
+  return undefined;
 }
 
 function requireEnv(name: string): string {
@@ -73,21 +110,20 @@ function parseHiresRows(rows: unknown[][]): HireRecord[] {
   if (rows.length === 0) return [];
   const [header, ...body] = rows as string[][];
   const idx = headerIndex(header);
-  const col = (name: string) => idx.get(name);
 
-  const iId = col("ID");
-  const iName = col("Candidate Name");
-  const iRole = col("Role");
-  const iBU = col("BU");
-  const iReqStart = col("Requisition Start Date");
-  const iOfferStatus = col("Offer Status");
-  const iOfferExtended = col("Offer Extended Date");
-  const iResumption = col("Resumption Date");
-  const iManualWeeks = col("Time to Hire (week)");
-  const iMedical = col("Pre-employment Medical Test");
-  const iAirtime = col("Airtime");
-  const iFeeding = col("Feeding");
-  const iManualTotal = col("Total Cost");
+  const iId = findColumn(idx, "id");
+  const iName = findColumn(idx, "candidateName");
+  const iRole = findColumn(idx, "role");
+  const iBU = findColumn(idx, "bu");
+  const iReqStart = findColumn(idx, "requisitionStartDate");
+  const iOfferStatus = findColumn(idx, "offerStatus");
+  const iOfferExtended = findColumn(idx, "offerExtendedDate");
+  const iResumption = findColumn(idx, "resumptionDate");
+  const iManualWeeks = findColumn(idx, "manualTimeToHireWeeks");
+  const iMedical = findColumn(idx, "medicalCost");
+  const iAirtime = findColumn(idx, "airtime");
+  const iFeeding = findColumn(idx, "feeding");
+  const iManualTotal = findColumn(idx, "manualTotalCost");
 
   return body
     .filter((row) => row.some((cell) => cell != null && cell !== ""))
@@ -124,7 +160,7 @@ function parseConfigColumns(rows: unknown[][]): ConfigLists {
   const [header, ...body] = rows as string[][];
   const idx = headerIndex(header);
   const colValues = (name: string): string[] => {
-    const i = idx.get(name);
+    const i = idx.get(normalizeHeader(name));
     if (i == null) return [];
     return body.map((row) => row[i]).filter((v): v is string => Boolean(v && String(v).trim()));
   };

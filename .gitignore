@@ -34,6 +34,11 @@ yarn-error.log*
 .env*
 !.env.local.example
 
+# Google credentials downloaded from Cloud Console — never commit these
+client_secret_*.json
+*.iam.gserviceaccount.com.json
+talent-dashboard-*.json
+
 # vercel
 .vercel
 

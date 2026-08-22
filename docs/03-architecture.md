@@ -6,7 +6,7 @@
 - **Styling:** Tailwind CSS.
 - **Charts:** Recharts (SVG, composable, plays well with Tailwind theming). Chart-specific design decisions (color palette, accessibility, layout) follow the project's `dataviz` skill at build time rather than being decided ad hoc per chart.
 - **Data source:** Google Sheets API v4, via a Google Cloud **service account** (not OAuth-per-user) — the service account is shared with edit access to the sheet, and its credentials live only in Vercel environment variables, never in the repo.
-- **Auth:** dashboard requires login from day one (confirmed). Recommended: NextAuth.js with Google OAuth restricted to your company's email domain — no passwords to manage, and it's the natural fit since you're already inside Google's ecosystem for the data source. A credentials-based (username/password) provider is a simpler fallback if domain-restricted OAuth turns out to be friction; either can be swapped without touching the data layer.
+- **Auth:** dashboard requires login from day one (confirmed). NextAuth.js (Auth.js v5) with Google OAuth, restricted via an exact-email allowlist (`ALLOWED_EMAILS`) and/or a company Workspace domain (`ALLOWED_EMAIL_DOMAIN`) — no passwords to manage. The allowlist matters specifically when the sheet owner signs in with a personal Gmail account: restricting by `@gmail.com` would admit anyone with a Gmail account, not just you, since that domain isn't actually owned by you.
 
 ## Why service account, not the Sheets "publish to web" / CSV approach
 
