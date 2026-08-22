@@ -78,24 +78,33 @@ export function PeriodFilter() {
     setOpen(false);
   }
 
-  const label = !from && !to ? "All Time" : `${from ?? "…"} → ${to ?? "…"}`;
+  const shortDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+  const label = !from && !to ? "All Time" : `${from ? shortDate(from) : "…"} – ${to ? shortDate(to) : "…"}`;
 
   return (
     <div className="relative" ref={containerRef}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm text-[var(--text-primary)] shadow-sm"
+        className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm whitespace-nowrap text-[var(--text-primary)] shadow-sm"
       >
-        <Calendar size={14} className="text-[var(--text-muted)]" />
+        <Calendar size={14} className="shrink-0 text-[var(--text-muted)]" />
         {label}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-2 w-72 max-w-[85vw] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-lg">
-          <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-            Period
-          </div>
+        <>
+          {/* Mobile: dim backdrop behind the bottom sheet, tap to close */}
+          <div className="fixed inset-0 z-10 bg-black/30 sm:hidden" onClick={() => setOpen(false)} />
+
+          <div
+            className="fixed inset-x-0 bottom-0 z-20 rounded-t-xl border-t border-[var(--border)] bg-[var(--surface)] p-4 shadow-lg
+                       sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-full sm:z-10 sm:mt-2 sm:w-72 sm:rounded-lg sm:border"
+          >
+            <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+              Period
+            </div>
           <div className="grid grid-cols-2 gap-2">
             <PresetButton active={preset === "all"} onClick={() => setPreset("all")}>
               All Time
@@ -144,7 +153,8 @@ export function PeriodFilter() {
               Reset
             </button>
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
