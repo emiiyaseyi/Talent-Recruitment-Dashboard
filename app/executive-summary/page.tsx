@@ -119,15 +119,15 @@ export default async function ExecutiveSummaryPage({
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[var(--border)] pb-6">
-        <div>
+      <header className="border-b border-[var(--border)] pb-6">
+        <div className="flex items-center justify-between gap-2">
           <span className="inline-block rounded-full bg-[var(--series-1)] px-3 py-1 text-xs font-semibold text-white">
             {quarter}
           </span>
-          <h1 className="mt-3 text-2xl font-bold text-[var(--text-primary)]">Talent Acquisition Dashboard</h1>
-        </div>
-        <div className="flex flex-col items-end gap-2">
           <PeriodFilter />
+        </div>
+        <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Talent Acquisition Dashboard</h1>
           <span className="text-sm text-[var(--text-muted)]">As of {asOf}</span>
         </div>
       </header>
