@@ -92,7 +92,7 @@ export function PeriodFilter() {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-10 mt-2 w-72 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-lg">
+        <div className="absolute right-0 z-10 mt-2 w-72 max-w-[85vw] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-lg">
           <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
             Period
           </div>

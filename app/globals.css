@@ -39,4 +39,8 @@ body {
   background: var(--page);
   color: var(--text-primary);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Safety net: no single element (nav, a wide table, a chart) should be
+     able to force the whole page to scroll sideways on mobile — anything
+     that needs to overflow should scroll internally instead. */
+  overflow-x: hidden;
 }
