@@ -3,15 +3,18 @@ import { ink, seriesPrimary } from "@/components/charts/theme";
 const RADIUS = 30;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-/** Badge-style stat: a filled circle with the number inside, label beside it —
- * the template's "21 / Average Days to Hire" pattern. */
+/** Badge-style stat: a filled circle with the number inside, label (and an
+ * optional smaller caption, e.g. the same figure in a different unit) beside
+ * it — the template's "21 / Average Days to Hire" pattern. */
 export function CircularStat({
   value,
   label,
+  caption,
   color = seriesPrimary,
 }: {
   value: string;
   label: string;
+  caption?: string;
   color?: string;
 }) {
   return (
@@ -22,7 +25,10 @@ export function CircularStat({
       >
         {value}
       </div>
-      <span className="text-sm font-medium text-[var(--text-primary)]">{label}</span>
+      <div>
+        <div className="text-sm font-medium text-[var(--text-primary)]">{label}</div>
+        {caption && <div className="text-xs text-[var(--text-muted)]">{caption}</div>}
+      </div>
     </div>
   );
 }

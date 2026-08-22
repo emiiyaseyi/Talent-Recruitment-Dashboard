@@ -31,13 +31,23 @@ export function timeToFillWeeks(r: HireRecord): number | null {
 /**
  * "Days to Hire" (offer accepted) vs. "Days to Fill" (candidate resumes) are
  * two different milestones — the template distinguishes them, and they can
- * differ a lot when there's a long notice period. Approximated from
- * Offer Extended Date, since we don't separately capture an acceptance date;
- * null whenever that field is blank (true for most historical rows).
+ * differ a lot when there's a long notice period. Preferred source is the
+ * computed gap to Offer Extended Date, since that's the most accurate once
+ * it's being filled in going forward; falls back to the pre-existing manual
+ * `Time to Hire (week)` column for historical rows that predate that field
+ * (which is every row today) — that manual figure is what "days/weeks to
+ * hire" already meant before this dashboard existed, so it's the right
+ * fallback rather than showing blank.
  */
 export function timeToHireDays(r: HireRecord): number | null {
-  if (r.offerStatus !== "Accepted" || !r.offerExtendedDate) return null;
-  return (r.offerExtendedDate.getTime() - r.requisitionStartDate.getTime()) / DAY_MS;
+  if (r.offerStatus !== "Accepted") return null;
+  if (r.offerExtendedDate) {
+    return (r.offerExtendedDate.getTime() - r.requisitionStartDate.getTime()) / DAY_MS;
+  }
+  if (r.manualTimeToHireWeeks != null) {
+    return r.manualTimeToHireWeeks * 7;
+  }
+  return null;
 }
 
 export function hires(records: HireRecord[]): HireRecord[] {

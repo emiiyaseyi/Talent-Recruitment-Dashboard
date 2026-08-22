@@ -27,13 +27,15 @@ export function OfficeSegmentCard({
 
       <div className="grid grid-cols-2 gap-4">
         <CircularStat
-          value={avgDaysToHire == null ? "—" : avgDaysToHire.toFixed(0)}
-          label="Average Days to Hire"
+          value={avgDaysToHire == null ? "—" : (avgDaysToHire / 7).toFixed(1)}
+          label="Average Weeks to Hire"
+          caption={avgDaysToHire == null ? undefined : `${avgDaysToHire.toFixed(0)} days`}
           color={categorical[4]}
         />
         <CircularStat
-          value={avgDaysToFill == null ? "—" : avgDaysToFill.toFixed(0)}
-          label="Average Days to Fill"
+          value={avgDaysToFill == null ? "—" : (avgDaysToFill / 7).toFixed(1)}
+          label="Average Weeks to Fill"
+          caption={avgDaysToFill == null ? undefined : `${avgDaysToFill.toFixed(0)} days`}
           color={categorical[0]}
         />
       </div>

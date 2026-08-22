@@ -112,8 +112,8 @@ export default async function ExecutiveSummaryPage() {
           <StatTile label="Total Offers Accepted" value={String(totalOffersAccepted(records))} />
           <StatTile
             label="Average Time to Fill"
-            value={avgDays == null ? "—" : `${avgDays.toFixed(0)} days`}
-            sublabel={avgWeeks == null ? undefined : `${avgWeeks.toFixed(1)} weeks`}
+            value={avgWeeks == null ? "—" : `${avgWeeks.toFixed(1)} weeks`}
+            sublabel={avgDays == null ? undefined : `${avgDays.toFixed(0)} days`}
           />
           <StatTile
             label="Average Cost of Hire"
