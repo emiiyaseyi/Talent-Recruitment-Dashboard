@@ -36,7 +36,7 @@ export default async function FinancialInsightsPage({
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Financial Insights</h1>
-      <FilterBar bus={config.bus} roles={config.roles} />
+      <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <ChartCard title="Cost Breakdown by Category">

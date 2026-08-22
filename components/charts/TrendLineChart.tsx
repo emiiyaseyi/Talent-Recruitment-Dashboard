@@ -28,6 +28,7 @@ export function TrendLineChart({ data, valueFormat = "number" }: TrendLineChartP
           stroke={seriesPrimary}
           strokeWidth={2}
           dot={{ r: 4, fill: seriesPrimary }}
+          isAnimationActive={false}
         />
       </LineChart>
     </ResponsiveContainer>

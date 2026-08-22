@@ -37,7 +37,7 @@ export default async function EfficiencyVelocityPage({
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Efficiency &amp; Velocity Metrics</h1>
-      <FilterBar bus={config.bus} roles={config.roles} />
+      <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
       <ChartCard title="Time-to-Hire Distribution">
         <FlatBarChart data={distribution} layout="horizontal" />

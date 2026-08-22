@@ -16,5 +16,6 @@ export function parseFilters(sp: SearchParams): Filters {
     to: to ? new Date(to) : null,
     bu: get("bu") ?? null,
     role: get("role") ?? null,
+    officeType: get("officeType") ?? null,
   };
 }

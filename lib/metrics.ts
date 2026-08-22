@@ -1,4 +1,4 @@
-import type { HireRecord, Filters, OfferStatus } from "./types";
+import type { HireRecord, Filters, OfferStatus, PipelineRecord } from "./types";
 
 // Every derived number the dashboard shows should come from this file — see
 // docs/02-metrics-dictionary.md for the spec each function below implements.
@@ -28,6 +28,18 @@ export function timeToFillWeeks(r: HireRecord): number | null {
   return days == null ? null : days / 7;
 }
 
+/**
+ * "Days to Hire" (offer accepted) vs. "Days to Fill" (candidate resumes) are
+ * two different milestones — the template distinguishes them, and they can
+ * differ a lot when there's a long notice period. Approximated from
+ * Offer Extended Date, since we don't separately capture an acceptance date;
+ * null whenever that field is blank (true for most historical rows).
+ */
+export function timeToHireDays(r: HireRecord): number | null {
+  if (r.offerStatus !== "Accepted" || !r.offerExtendedDate) return null;
+  return (r.offerExtendedDate.getTime() - r.requisitionStartDate.getTime()) / DAY_MS;
+}
+
 export function hires(records: HireRecord[]): HireRecord[] {
   return records.filter((r) => r.offerStatus === "Accepted");
 }
@@ -38,6 +50,7 @@ export function applyFilters(records: HireRecord[], filters: Partial<Filters>): 
     if (filters.to && r.requisitionStartDate > filters.to) return false;
     if (filters.bu && r.bu !== filters.bu) return false;
     if (filters.role && r.role !== filters.role) return false;
+    if (filters.officeType && r.officeType !== filters.officeType) return false;
     return true;
   });
 }
@@ -74,6 +87,16 @@ export function offerAcceptanceRate(records: HireRecord[]): number | null {
   return accepted / resolved.length;
 }
 
+/** Share of resolved offers (Accepted + Declined + Withdrawn) that were
+ * Withdrawn — the template's "Withdrawal Rate (after cc)" stat. Same
+ * denominator convention as offerAcceptanceRate, for consistency. */
+export function withdrawalRate(records: HireRecord[]): number | null {
+  const resolved = records.filter((r) => r.offerStatus !== "Pending");
+  if (resolved.length === 0) return null;
+  const withdrawn = resolved.filter((r) => r.offerStatus === "Withdrawn").length;
+  return withdrawn / resolved.length;
+}
+
 export function averageTimeToFillDays(records: HireRecord[]): number | null {
   const days = hires(records)
     .map(timeToFillDays)
@@ -86,8 +109,25 @@ export function averageTimeToFillWeeks(records: HireRecord[]): number | null {
   return days == null ? null : days / 7;
 }
 
+export function averageTimeToHireDays(records: HireRecord[]): number | null {
+  const days = hires(records)
+    .map(timeToHireDays)
+    .filter((d): d is number => d != null);
+  return avg(days);
+}
+
 export function averageCostOfHire(records: HireRecord[]): number | null {
   return avg(hires(records).map(computedTotalCost));
+}
+
+/** Splits records by Office Type (Front Office / Back Office, or whatever
+ * Config!OfficeTypes defines) so the executive summary can show the same KPI
+ * block per segment, mirroring the template's Technical/Non-Technical split. */
+export function byOfficeType(records: HireRecord[], officeTypes: string[]): { officeType: string; records: HireRecord[] }[] {
+  return officeTypes.map((officeType) => ({
+    officeType,
+    records: records.filter((r) => r.officeType === officeType),
+  }));
 }
 
 // ---------- Financial Insights ----------
@@ -282,6 +322,13 @@ export function roleConcentration(records: HireRecord[]): GroupedCount[] {
   return groupCountBy(hires(records), (r) => r.role);
 }
 
+export function hiringSourceBreakdown(records: HireRecord[]): GroupedCount[] {
+  return groupCountBy(
+    hires(records).filter((r) => r.hiringSource),
+    (r) => r.hiringSource
+  );
+}
+
 export interface SeasonalityPoint {
   period: string;
   count: number;
@@ -342,4 +389,61 @@ export function monthlyBreakdown(records: HireRecord[]): MonthlyBreakdownRow[] {
 
 export function isOfferStatus(value: string): value is OfferStatus {
   return ["Accepted", "Declined", "Pending", "Withdrawn"].includes(value);
+}
+
+// ---------- Pipeline (open roles) ----------
+
+export function applyPipelineFilters(
+  pipeline: PipelineRecord[],
+  filters: Partial<Filters>
+): PipelineRecord[] {
+  return pipeline.filter((r) => {
+    if (filters.from && r.requisitionStartDate < filters.from) return false;
+    if (filters.to && r.requisitionStartDate > filters.to) return false;
+    if (filters.bu && r.bu !== filters.bu) return false;
+    if (filters.role && r.role !== filters.role) return false;
+    if (filters.officeType && r.officeType !== filters.officeType) return false;
+    return true;
+  });
+}
+
+export interface PipelineRow {
+  role: string;
+  total: number;
+  /** Count per stage, keyed by the stage names from Config!PipelineStages —
+   * stages are admin-editable, so this is a lookup, not fixed fields. */
+  stageCounts: Record<string, number>;
+}
+
+/** One row per role, one column per stage — the template's "Current Hiring
+ * Pipeline" table. `stages` should come from Config!PipelineStages so the
+ * column set follows whatever the admin has configured, never a hardcoded list. */
+export function pipelineByRole(pipeline: PipelineRecord[], stages: string[]): PipelineRow[] {
+  const map = new Map<string, PipelineRow>();
+  for (const r of pipeline) {
+    const row = map.get(r.role) ?? {
+      role: r.role,
+      total: 0,
+      stageCounts: Object.fromEntries(stages.map((s) => [s, 0])),
+    };
+    row.total += 1;
+    row.stageCounts[r.currentStage] = (row.stageCounts[r.currentStage] ?? 0) + 1;
+    map.set(r.role, row);
+  }
+  return [...map.values()].sort((a, b) => b.total - a.total);
+}
+
+export function pipelineAgingRequisitions(
+  pipeline: PipelineRecord[],
+  asOf: Date = new Date()
+): AgingRequisition[] {
+  return pipeline
+    .map((r) => ({
+      id: r.id,
+      candidateName: r.candidateName,
+      role: r.role,
+      bu: r.bu,
+      daysElapsed: (asOf.getTime() - r.requisitionStartDate.getTime()) / DAY_MS,
+    }))
+    .sort((a, b) => b.daysElapsed - a.daysElapsed);
 }

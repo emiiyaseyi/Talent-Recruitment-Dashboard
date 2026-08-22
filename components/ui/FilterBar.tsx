@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 interface FilterBarProps {
   bus: string[];
   roles: string[];
+  officeTypes?: string[];
 }
 
-export function FilterBar({ bus, roles }: FilterBarProps) {
+export function FilterBar({ bus, roles, officeTypes = [] }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -32,6 +33,14 @@ export function FilterBar({ bus, roles }: FilterBarProps) {
         options={roles}
         onChange={(v) => setParam("role", v)}
       />
+      {officeTypes.length > 0 && (
+        <FilterSelect
+          label="Office"
+          value={searchParams.get("officeType") ?? ""}
+          options={officeTypes}
+          onChange={(v) => setParam("officeType", v)}
+        />
+      )}
       <label className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
         From
         <input
@@ -50,7 +59,11 @@ export function FilterBar({ bus, roles }: FilterBarProps) {
           className="rounded-md border border-[var(--border)] bg-[var(--page)] px-2 py-1 text-sm text-[var(--text-primary)]"
         />
       </label>
-      {(searchParams.get("bu") || searchParams.get("role") || searchParams.get("from") || searchParams.get("to")) && (
+      {(searchParams.get("bu") ||
+        searchParams.get("role") ||
+        searchParams.get("officeType") ||
+        searchParams.get("from") ||
+        searchParams.get("to")) && (
         <button
           onClick={() => router.push("?")}
           className="text-sm text-[var(--text-secondary)] underline hover:text-[var(--text-primary)]"

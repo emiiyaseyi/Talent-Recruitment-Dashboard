@@ -1,10 +1,11 @@
 import { google } from "googleapis";
-import type { ConfigLists, DashboardData, HireRecord, OfferStatus } from "./types";
+import type { ConfigLists, DashboardData, HireRecord, OfferStatus, PipelineRecord } from "./types";
 import { isOfferStatus } from "./metrics";
 import { getSampleDashboardData } from "./sampleData";
 
-const HIRES_RANGE = "Hires!A1:M";
-const CONFIG_RANGE = "Config!A1:C";
+const HIRES_RANGE = "Hires!A1:O";
+const PIPELINE_RANGE = "Pipeline!A1:H";
+const CONFIG_RANGE = "Config!A1:F";
 
 /** Google Sheets serial date (days since 1899-12-30) -> JS Date, timezone-safe. */
 function serialToDate(serial: number): Date {
@@ -69,6 +70,9 @@ const HEADER_ALIASES: Record<string, string[]> = {
   airtime: ["airtime"],
   feeding: ["feeding"],
   manualTotalCost: ["total cost"],
+  officeType: ["office type"],
+  hiringSource: ["hiring source", "source"],
+  currentStage: ["current stage", "pipeline stage", "stage"],
 };
 
 function findColumn(idx: Map<string, number>, field: keyof typeof HEADER_ALIASES): number | undefined {
@@ -124,6 +128,8 @@ function parseHiresRows(rows: unknown[][]): HireRecord[] {
   const iAirtime = findColumn(idx, "airtime");
   const iFeeding = findColumn(idx, "feeding");
   const iManualTotal = findColumn(idx, "manualTotalCost");
+  const iOfficeType = findColumn(idx, "officeType");
+  const iHiringSource = findColumn(idx, "hiringSource");
 
   return body
     .filter((row) => row.some((cell) => cell != null && cell !== ""))
@@ -141,6 +147,8 @@ function parseHiresRows(rows: unknown[][]): HireRecord[] {
         candidateName: String(get(iName) ?? ""),
         role: String(get(iRole) ?? ""),
         bu: String(get(iBU) ?? ""),
+        officeType: String(get(iOfficeType) ?? ""),
+        hiringSource: String(get(iHiringSource) ?? ""),
         requisitionStartDate,
         offerStatus,
         offerExtendedDate: parseDateCell(get(iOfferExtended)),
@@ -155,8 +163,53 @@ function parseHiresRows(rows: unknown[][]): HireRecord[] {
     .filter((r): r is HireRecord => r !== null);
 }
 
+function parsePipelineRows(rows: unknown[][]): PipelineRecord[] {
+  if (rows.length === 0) return [];
+  const [header, ...body] = rows as string[][];
+  const idx = headerIndex(header);
+
+  const iId = findColumn(idx, "id");
+  const iName = findColumn(idx, "candidateName");
+  const iRole = findColumn(idx, "role");
+  const iBU = findColumn(idx, "bu");
+  const iOfficeType = findColumn(idx, "officeType");
+  const iHiringSource = findColumn(idx, "hiringSource");
+  const iReqStart = findColumn(idx, "requisitionStartDate");
+  const iStage = findColumn(idx, "currentStage");
+
+  return body
+    .filter((row) => row.some((cell) => cell != null && cell !== ""))
+    .map((row, i): PipelineRecord | null => {
+      const get = (index: number | undefined) => (index == null ? undefined : row[index]);
+
+      const requisitionStartDate = parseDateCell(get(iReqStart));
+      if (!requisitionStartDate) return null;
+
+      return {
+        id: String(get(iId) ?? `pipeline-row-${i}`),
+        candidateName: String(get(iName) ?? ""),
+        role: String(get(iRole) ?? ""),
+        bu: String(get(iBU) ?? ""),
+        officeType: String(get(iOfficeType) ?? ""),
+        hiringSource: String(get(iHiringSource) ?? ""),
+        requisitionStartDate,
+        currentStage: String(get(iStage) ?? ""),
+      };
+    })
+    .filter((r): r is PipelineRecord => r !== null);
+}
+
+const EMPTY_CONFIG: ConfigLists = {
+  bus: [],
+  roles: [],
+  offerStatuses: [],
+  officeTypes: [],
+  hiringSources: [],
+  pipelineStages: [],
+};
+
 function parseConfigColumns(rows: unknown[][]): ConfigLists {
-  if (rows.length === 0) return { bus: [], roles: [], offerStatuses: [] };
+  if (rows.length === 0) return EMPTY_CONFIG;
   const [header, ...body] = rows as string[][];
   const idx = headerIndex(header);
   const colValues = (name: string): string[] => {
@@ -169,6 +222,9 @@ function parseConfigColumns(rows: unknown[][]): ConfigLists {
     bus: colValues("BUs"),
     roles: colValues("Roles"),
     offerStatuses: colValues("OfferStatuses").filter(isOfferStatus),
+    officeTypes: colValues("OfficeTypes"),
+    hiringSources: colValues("HiringSources"),
+    pipelineStages: colValues("PipelineStages"),
   };
 }
 
@@ -194,7 +250,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const sheets = await getSheetsClient();
   const spreadsheetId = requireEnv("GOOGLE_SHEET_ID");
 
-  const [hiresRes, configRes] = await Promise.all([
+  const [hiresRes, configRes, pipelineRes] = await Promise.all([
     sheets.spreadsheets.values.get({
       spreadsheetId,
       range: HIRES_RANGE,
@@ -206,10 +262,24 @@ export async function getDashboardData(): Promise<DashboardData> {
       range: CONFIG_RANGE,
       valueRenderOption: "UNFORMATTED_VALUE",
     }),
+    // The Pipeline tab is newer than Hires/Config — tolerate it not existing
+    // yet on a sheet that hasn't had Phase 0's pipeline setup applied.
+    sheets.spreadsheets.values
+      .get({
+        spreadsheetId,
+        range: PIPELINE_RANGE,
+        valueRenderOption: "UNFORMATTED_VALUE",
+        dateTimeRenderOption: "SERIAL_NUMBER",
+      })
+      .catch(() => {
+        console.warn(`[sheets] No "Pipeline" tab found — pipeline section will be empty.`);
+        return null;
+      }),
   ]);
 
   const records = parseHiresRows((hiresRes.data.values ?? []) as unknown[][]);
   const config = parseConfigColumns((configRes.data.values ?? []) as unknown[][]);
+  const pipeline = parsePipelineRows((pipelineRes?.data.values ?? []) as unknown[][]);
 
-  return { records, config };
+  return { records, pipeline, config };
 }

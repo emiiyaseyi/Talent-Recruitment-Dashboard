@@ -1,4 +1,4 @@
-import type { DashboardData, HireRecord, OfferStatus } from "./types";
+import type { DashboardData, HireRecord, OfferStatus, PipelineRecord } from "./types";
 
 /**
  * DEV-ONLY sample data, used solely so the dashboard UI can be built and
@@ -9,14 +9,26 @@ import type { DashboardData, HireRecord, OfferStatus } from "./types";
  */
 
 const BUS = ["Engineering", "Sales", "Operations", "Customer Success", "Finance"];
-const ROLES = [
-  "Software Engineer",
-  "Sales Executive",
-  "Operations Analyst",
-  "Customer Success Rep",
-  "Financial Analyst",
-  "Product Manager",
-  "QA Engineer",
+const OFFICE_TYPES = ["Front Office", "Back Office"];
+const ROLES: { name: string; officeType: string }[] = [
+  { name: "Software Engineer", officeType: "Back Office" },
+  { name: "Sales Executive", officeType: "Front Office" },
+  { name: "Operations Analyst", officeType: "Back Office" },
+  { name: "Customer Success Rep", officeType: "Front Office" },
+  { name: "Financial Analyst", officeType: "Back Office" },
+  { name: "Product Manager", officeType: "Back Office" },
+  { name: "QA Engineer", officeType: "Back Office" },
+  { name: "Relationship Manager", officeType: "Front Office" },
+];
+const HIRING_SOURCES = ["Referral", "LinkedIn", "Job Board", "Agency", "Direct"];
+const PIPELINE_STAGES = [
+  "Requisition",
+  "Psychometric Assessment",
+  "First Level with Hiring Team",
+  "Second Level with HBUs",
+  "Offer",
+  "Medical",
+  "Resumption",
 ];
 const STATUSES: OfferStatus[] = ["Accepted", "Accepted", "Accepted", "Declined", "Pending"];
 
@@ -38,20 +50,17 @@ function daysAgo(from: Date, days: number): Date {
   return new Date(from.getTime() - days * 86400000);
 }
 
-function generateRecords(count: number): HireRecord[] {
-  const rng = mulberry32(42);
-  const now = new Date();
+function generateRecords(count: number, rng: () => number, now: Date): HireRecord[] {
   const records: HireRecord[] = [];
 
   for (let i = 0; i < count; i++) {
-    const requisitionStartDate = daysAgo(now, Math.floor(rng() * 210) + 5);
+    const requisitionStartDate = daysAgo(now, Math.floor(rng() * 210) + 30);
     const offerStatus = pick(rng, STATUSES);
     const isAccepted = offerStatus === "Accepted";
-    const isPending = offerStatus === "Pending";
+    const role = pick(rng, ROLES);
 
     const cycleDays = Math.floor(rng() * 45) + 5;
-    const resumptionDate =
-      isAccepted && !isPending ? daysAgo(requisitionStartDate, -cycleDays) : null;
+    const resumptionDate = isAccepted ? daysAgo(requisitionStartDate, -cycleDays) : null;
 
     const medicalCost = isAccepted ? Math.round((rng() * 8000 + 4000) / 100) * 100 : 0;
     const airtimeCost = isAccepted ? Math.round((rng() * 2000 + 500) / 100) * 100 : 0;
@@ -60,8 +69,10 @@ function generateRecords(count: number): HireRecord[] {
     records.push({
       id: `sample-${i}`,
       candidateName: `Sample Candidate ${i + 1}`,
-      role: pick(rng, ROLES),
+      role: role.name,
       bu: pick(rng, BUS),
+      officeType: role.officeType,
+      hiringSource: pick(rng, HIRING_SOURCES),
       requisitionStartDate,
       offerStatus,
       offerExtendedDate: daysAgo(requisitionStartDate, -Math.floor(rng() * 10 + 2)),
@@ -79,13 +90,48 @@ function generateRecords(count: number): HireRecord[] {
   );
 }
 
+function generatePipeline(count: number, rng: () => number, now: Date): PipelineRecord[] {
+  const records: PipelineRecord[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const requisitionStartDate = daysAgo(now, Math.floor(rng() * 60) + 1);
+    const role = pick(rng, ROLES);
+    // Earlier-stage weighting: most open roles sit somewhere in the middle of
+    // the funnel, few are brand-new or right at the finish line.
+    const stageIndex = Math.min(
+      PIPELINE_STAGES.length - 1,
+      Math.floor(rng() * rng() * PIPELINE_STAGES.length * 1.4)
+    );
+
+    records.push({
+      id: `pipeline-sample-${i}`,
+      candidateName: `Pipeline Candidate ${i + 1}`,
+      role: role.name,
+      bu: pick(rng, BUS),
+      officeType: role.officeType,
+      hiringSource: pick(rng, HIRING_SOURCES),
+      requisitionStartDate,
+      currentStage: PIPELINE_STAGES[stageIndex],
+    });
+  }
+
+  return records;
+}
+
 export function getSampleDashboardData(): DashboardData {
+  const rng = mulberry32(42);
+  const now = new Date();
+
   return {
-    records: generateRecords(60),
+    records: generateRecords(60, rng, now),
+    pipeline: generatePipeline(18, rng, now),
     config: {
       bus: BUS,
-      roles: ROLES,
+      roles: ROLES.map((r) => r.name),
       offerStatuses: ["Accepted", "Declined", "Pending", "Withdrawn"],
+      officeTypes: OFFICE_TYPES,
+      hiringSources: HIRING_SOURCES,
+      pipelineStages: PIPELINE_STAGES,
     },
   };
 }

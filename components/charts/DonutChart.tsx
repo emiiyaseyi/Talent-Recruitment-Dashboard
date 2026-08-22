@@ -20,6 +20,7 @@ export function DonutChart({ data, valueFormat = "number" }: DonutChartProps) {
           innerRadius={60}
           outerRadius={95}
           paddingAngle={2}
+          isAnimationActive={false}
         >
           {data.map((entry, i) => (
             <Cell key={entry.label} fill={categorical[i % categorical.length]} />

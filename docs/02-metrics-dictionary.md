@@ -14,6 +14,16 @@ Notation: `rows` = all records from `Hires`. `hires` = `rows` filtered to `Offer
 | **Average Time to Fill (days)** | `avg(Resumption Date − Requisition Start Date)` over `hires` with both dates present | Rows missing either date are excluded, not treated as 0. |
 | **Average Time to Fill (weeks)** | `avg time to fill (days) / 7` | Derived from the days figure, not averaged separately, so the two numbers can never disagree. |
 | **Average Cost of Hire** | `avg(Total Cost)` over `hires` | Total Cost = Medical + Airtime + Feeding (computed, see schema doc). |
+| **Withdrawal Rate** | `count(Withdrawn) / count(rows where Offer Status != Pending)` | Same denominator convention as Offer Acceptance Rate, so the two are directly comparable. |
+| **Average Days to Hire** | `avg(Offer Extended Date − Requisition Start Date)` over `hires` with `Offer Extended Date` present | Distinct from Time to Fill — this is "offer accepted," not "candidate resumed." Approximated from `Offer Extended Date` since there's no separate acceptance-date field; will read as `—` for most historical rows since that field is usually blank. |
+| **Hiring by Office** | All of the above (Days to Hire, Days to Fill, Acceptance Rate, Withdrawal Rate), recomputed once per `Office Type` in `Config!OfficeTypes` | Splits the executive summary into one card per office type, mirroring the template's Technical/Non-Technical split. Rows with a blank `Office Type` are excluded from every segment (not silently bucketed into one). |
+
+## Pipeline (open roles)
+
+| Metric | Formula | Chart |
+|---|---|---|
+| **Current Hiring Pipeline** | `count(Pipeline rows)` grouped by `Role` × `Current Stage` | Table — one row per role, one column per stage (from `Config!PipelineStages`), a total column. Stage set is config-driven, not hardcoded, since stages are meant to be admin-editable. |
+| **Pipeline Aging** | `today − Requisition Start Date` per `Pipeline` row | Same shape as the old Hires-based aging metric, now sourced from the dedicated `Pipeline` tab instead of `Offer Status = Pending` rows in `Hires`. |
 
 ## Financial Insights
 
@@ -23,6 +33,8 @@ Notation: `rows` = all records from `Hires`. `hires` = `rows` filtered to `Offer
 | **Total Recruitment Investment by BU** | `sum(Total Cost)` grouped by `BU`, over `hires` | Bar |
 | **Cost per Hire by Role** | `avg(Total Cost)` grouped by `Role`, over `hires`; show n per role since small samples are noisy | Bar, sorted descending |
 | **Cost per Hire Trend** | `avg(Total Cost)` grouped by month of `Resumption Date` | Line — bonus metric beyond your original list, shows whether cost-per-hire is rising or falling over time |
+| **Recruitment Costs (monthly)** | `sum(Total Cost)` grouped by month of `Requisition Start Date`, over `hires` | Bar/line — total spend per month, template's "Recruitment Costs" chart. |
+| **Top Hiring Sources** | `count(hires)` grouped by `Hiring Source`, sorted descending | Bar — rows with a blank `Hiring Source` are excluded rather than counted as a category. |
 
 ## Efficiency & Velocity Metrics
 

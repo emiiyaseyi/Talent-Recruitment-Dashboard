@@ -39,7 +39,7 @@ export default async function BuRoleDemographicsPage({
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">BU &amp; Role Demographics</h1>
-      <FilterBar bus={config.bus} roles={config.roles} />
+      <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <ChartCard title="Headcount by BU">

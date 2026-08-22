@@ -39,7 +39,7 @@ export function FlatBarChart({ data, valueFormat = "number", layout = "vertical"
           formatter={(value: unknown) => formatValue(Number(value), valueFormat)}
           contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         />
-        <Bar dataKey="value" fill={seriesPrimary} radius={4} />
+        <Bar dataKey="value" fill={seriesPrimary} radius={4} isAnimationActive={false} />
       </BarChart>
     </ResponsiveContainer>
   );
