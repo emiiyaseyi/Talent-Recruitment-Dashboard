@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import { ink, seriesPrimary } from "@/components/charts/theme";
 
 const RADIUS = 30;
@@ -40,31 +41,36 @@ export function RingStat({
   label,
   sublabel,
   color = seriesPrimary,
+  icon: Icon,
 }: {
   percent: number | null;
   label: string;
   sublabel?: string;
   color?: string;
+  icon?: LucideIcon;
 }) {
   const pct = percent == null ? 0 : Math.max(0, Math.min(1, percent));
   const offset = CIRCUMFERENCE * (1 - pct);
 
   return (
     <div className="flex items-center gap-3">
-      <svg width="64" height="64" viewBox="0 0 64 64" className="shrink-0 -rotate-90">
-        <circle cx="32" cy="32" r={RADIUS} fill="none" stroke={ink.grid} strokeWidth="6" />
-        <circle
-          cx="32"
-          cy="32"
-          r={RADIUS}
-          fill="none"
-          stroke={color}
-          strokeWidth="6"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-        />
-      </svg>
+      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+        <svg width="64" height="64" viewBox="0 0 64 64" className="absolute inset-0 -rotate-90">
+          <circle cx="32" cy="32" r={RADIUS} fill="none" stroke={ink.grid} strokeWidth="6" />
+          <circle
+            cx="32"
+            cy="32"
+            r={RADIUS}
+            fill="none"
+            stroke={color}
+            strokeWidth="6"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+          />
+        </svg>
+        {Icon && <Icon size={22} strokeWidth={2} style={{ color }} />}
+      </div>
       <div>
         <div className="text-lg font-bold text-[var(--text-primary)]">
           {percent == null ? "—" : `${(percent * 100).toFixed(0)}%`}

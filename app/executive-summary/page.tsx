@@ -30,7 +30,21 @@ import { topNWithOther } from "@/lib/chartData";
 import { OfficeSegmentCard } from "@/components/ui/OfficeSegmentCard";
 import { PipelineTable } from "@/components/ui/PipelineTable";
 import { categorical } from "@/components/charts/theme";
-import { Wallet, Landmark, TrendingUp, Share2, BarChart3, Zap, Users, Award, Calendar, GitBranch } from "lucide-react";
+import {
+  Wallet,
+  Landmark,
+  TrendingUp,
+  Share2,
+  BarChart3,
+  Zap,
+  Users,
+  Award,
+  Calendar,
+  GitBranch,
+  Send,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { parseFilters, type SearchParams } from "@/lib/filters";
 import { PeriodFilter } from "@/components/ui/PeriodFilter";
 
@@ -120,16 +134,30 @@ export default async function ExecutiveSummaryPage({
 
       <section>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <StatTile label="Total Offers Extended" value={String(totalOffersExtended(records))} />
-          <StatTile label="Total Offers Accepted" value={String(totalOffersAccepted(records))} />
+          <StatTile
+            label="Total Offers Extended"
+            value={String(totalOffersExtended(records))}
+            icon={Send}
+            iconColor={categorical[3]}
+          />
+          <StatTile
+            label="Total Offers Accepted"
+            value={String(totalOffersAccepted(records))}
+            icon={CheckCircle2}
+            iconColor={categorical[1]}
+          />
           <StatTile
             label="Average Time to Fill"
             value={avgWeeks == null ? "—" : `${avgWeeks.toFixed(1)} weeks`}
             sublabel={avgDays == null ? undefined : `${avgDays.toFixed(0)} days`}
+            icon={Clock}
+            iconColor={categorical[4]}
           />
           <StatTile
             label="Average Cost of Hire"
             value={avgCost == null ? "—" : formatCurrency(avgCost)}
+            icon={Wallet}
+            iconColor={categorical[0]}
           />
         </div>
       </section>

@@ -1,4 +1,6 @@
+import { CheckCircle2, UserMinus, Building2 } from "lucide-react";
 import { CircularStat, RingStat } from "./CircularStat";
+import { IconBadge } from "./IconBadge";
 import { categorical, status } from "@/components/charts/theme";
 
 interface OfficeSegmentCardProps {
@@ -20,9 +22,12 @@ export function OfficeSegmentCard({
 }: OfficeSegmentCardProps) {
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-      <div className="mb-5 flex items-center gap-2">
-        <span className="h-3 w-3 rounded-sm" style={{ background: accentColor }} aria-hidden />
-        <h3 className="text-base font-semibold text-[var(--text-primary)]">{title}</h3>
+      <div className="mb-5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="h-3 w-3 rounded-sm" style={{ background: accentColor }} aria-hidden />
+          <h3 className="text-base font-semibold text-[var(--text-primary)]">{title}</h3>
+        </div>
+        <IconBadge icon={Building2} color={accentColor} size={36} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -41,12 +46,13 @@ export function OfficeSegmentCard({
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-4 border-t border-[var(--border)] pt-5">
-        <RingStat percent={acceptanceRate} label="Offer acceptance rate" color={accentColor} />
+        <RingStat percent={acceptanceRate} label="Offer acceptance rate" color={accentColor} icon={CheckCircle2} />
         <RingStat
           percent={withdrawalRate}
           label="Withdrawal Rate"
           sublabel="of resolved offers"
           color={status.critical}
+          icon={UserMinus}
         />
       </div>
     </div>

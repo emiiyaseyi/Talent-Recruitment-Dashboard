@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { IconBadge } from "@/components/ui/IconBadge";
 
 interface ChartCardProps {
   title: string;
@@ -10,17 +11,9 @@ interface ChartCardProps {
 export function ChartCard({ title, icon: Icon, iconColor = "var(--series-1)", children }: ChartCardProps) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-      <div className="mb-4 flex items-center gap-3">
-        {Icon && (
-          <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-            style={{ background: `color-mix(in srgb, ${iconColor} 15%, white)`, color: iconColor }}
-            aria-hidden
-          >
-            <Icon size={18} strokeWidth={2} />
-          </span>
-        )}
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-sm font-medium text-[var(--text-secondary)]">{title}</h3>
+        {Icon && <IconBadge icon={Icon} color={iconColor} size={36} />}
       </div>
       {children}
     </div>
