@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 /*
- * Branded dark theme, chosen to match the "Recruitment Dashboard" template
- * (dark navy, purple/teal/amber accents). Fixed — not system-theme-aware —
- * since this is a deliberate brand identity for an executive dashboard, not
- * a general-purpose app. The 6 categorical series colors below were derived
- * from the template's palette and validated with the dataviz skill's
- * validator (scripts/validate_palette.js): lightness band, chroma floor, CVD
- * adjacent-pair separation, normal-vision floor, and contrast vs. this exact
- * surface all pass in this order — reordering would need re-validation.
+ * Branded light theme (revised from the earlier dark navy version — kept
+ * the same validated categorical hues, just re-checked against a white
+ * surface, see below). Fixed — not system-theme-aware — this is a
+ * deliberate brand identity, not a general-purpose app. The 6 categorical
+ * series colors were validated with the dataviz skill's validator
+ * (scripts/validate_palette.js) against surface #ffffff: lightness band,
+ * chroma floor, CVD adjacent-pair separation, normal-vision floor, and
+ * contrast all pass in this order — reordering would need re-validation.
  */
 :root {
-  color-scheme: dark;
-  --page: #100f21;
-  --surface: #1b1a35;
-  --surface-raised: #221f42;
-  --border: rgba(255, 255, 255, 0.08);
-  --text-primary: #ffffff;
-  --text-secondary: #b8b5d1;
-  --text-muted: #7d7a9c;
-  --grid: #2c2a52;
-  --baseline: #3a3765;
+  color-scheme: light;
+  --page: #eef2ee;
+  --surface: #ffffff;
+  --surface-raised: #f7faf7;
+  --border: #e3e8e3;
+  --text-primary: #16181a;
+  --text-secondary: #5b625d;
+  --text-muted: #8b928c;
+  --grid: #e7ebe7;
+  --baseline: #d5dbd5;
 
   --series-1: #8b7cf6; /* violet — brand primary */
   --series-2: #0d9488; /* teal — brand secondary */

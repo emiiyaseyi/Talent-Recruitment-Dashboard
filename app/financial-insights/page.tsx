@@ -12,6 +12,7 @@ import { ChartCard } from "@/components/charts/ChartCard";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { FlatBarChart } from "@/components/charts/FlatBarChart";
 import { TrendLineChart } from "@/components/charts/TrendLineChart";
+import { Wallet, Landmark, Users, TrendingUp } from "lucide-react";
 
 export default async function FinancialInsightsPage({
   searchParams,
@@ -40,16 +41,16 @@ export default async function FinancialInsightsPage({
       <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <ChartCard title="Cost Breakdown by Category">
+        <ChartCard title="Cost Breakdown by Category" icon={Wallet} iconColor="var(--series-5)">
           <DonutChart data={breakdown} valueFormat="currency" />
         </ChartCard>
-        <ChartCard title="Total Recruitment Investment by BU">
+        <ChartCard title="Total Recruitment Investment by BU" icon={Landmark} iconColor="var(--series-1)">
           <FlatBarChart data={byBU} valueFormat="currency" />
         </ChartCard>
-        <ChartCard title="Cost per Hire by Role">
+        <ChartCard title="Cost per Hire by Role" icon={Users} iconColor="var(--series-2)">
           <FlatBarChart data={byRole} valueFormat="currency" />
         </ChartCard>
-        <ChartCard title="Cost per Hire Trend">
+        <ChartCard title="Cost per Hire Trend" icon={TrendingUp} iconColor="var(--series-4)">
           <TrendLineChart data={trend} valueFormat="currency" />
         </ChartCard>
       </div>

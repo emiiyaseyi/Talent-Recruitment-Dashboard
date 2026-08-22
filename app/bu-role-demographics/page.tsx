@@ -15,6 +15,7 @@ import { TrendLineChart } from "@/components/charts/TrendLineChart";
 import { DataTable } from "@/components/ui/DataTable";
 import { topNWithOther } from "@/lib/chartData";
 import type { MonthlyBreakdownRow } from "@/lib/metrics";
+import { Users, Award, Calendar, Table2 } from "lucide-react";
 
 export default async function BuRoleDemographicsPage({
   searchParams,
@@ -42,19 +43,19 @@ export default async function BuRoleDemographicsPage({
       <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <ChartCard title="Headcount by BU">
+        <ChartCard title="Headcount by BU" icon={Users} iconColor="var(--series-1)">
           <FlatBarChart data={headcount} />
         </ChartCard>
-        <ChartCard title="Role Concentration">
+        <ChartCard title="Role Concentration" icon={Award} iconColor="var(--series-2)">
           <FlatBarChart data={roles} />
         </ChartCard>
       </div>
 
-      <ChartCard title="Hiring Seasonality">
+      <ChartCard title="Hiring Seasonality" icon={Calendar} iconColor="var(--series-4)">
         <TrendLineChart data={seasonality} />
       </ChartCard>
 
-      <ChartCard title="Monthly Breakdown">
+      <ChartCard title="Monthly Breakdown" icon={Table2} iconColor="var(--series-5)">
         <DataTable<MonthlyBreakdownRow>
           rowKey={(r) => r.month}
           emptyMessage="No offers in this range."

@@ -14,6 +14,7 @@ import { FlatBarChart } from "@/components/charts/FlatBarChart";
 import { DataTable } from "@/components/ui/DataTable";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { AgingRequisition, VelocityRanking } from "@/lib/metrics";
+import { BarChart3, Clock, Zap } from "lucide-react";
 
 export default async function EfficiencyVelocityPage({
   searchParams,
@@ -39,11 +40,11 @@ export default async function EfficiencyVelocityPage({
       <h1 className="text-xl font-semibold">Efficiency &amp; Velocity Metrics</h1>
       <FilterBar bus={config.bus} roles={config.roles} officeTypes={config.officeTypes} />
 
-      <ChartCard title="Time-to-Hire Distribution">
+      <ChartCard title="Time-to-Hire Distribution" icon={BarChart3} iconColor="var(--series-4)">
         <FlatBarChart data={distribution} layout="horizontal" />
       </ChartCard>
 
-      <ChartCard title="Aging Requisitions (open pipeline)">
+      <ChartCard title="Aging Requisitions (open pipeline)" icon={Clock} iconColor="var(--series-3)">
         <DataTable<AgingRequisition>
           rowKey={(r) => r.id}
           emptyMessage="No open requisitions in this range."
@@ -72,10 +73,10 @@ export default async function EfficiencyVelocityPage({
       </ChartCard>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <ChartCard title="BU Leaderboard — Fastest to Slowest">
+        <ChartCard title="BU Leaderboard — Fastest to Slowest" icon={Zap} iconColor="var(--series-2)">
           <VelocityTable rows={buRanking} />
         </ChartCard>
-        <ChartCard title="Role Leaderboard — Fastest to Slowest">
+        <ChartCard title="Role Leaderboard — Fastest to Slowest" icon={Zap} iconColor="var(--series-1)">
           <VelocityTable rows={roleRanking} />
         </ChartCard>
       </div>
