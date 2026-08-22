@@ -5,7 +5,7 @@ import { ink, seriesPrimary } from "./theme";
 import { formatValue, type ValueFormat } from "./format";
 
 interface FlatBarChartProps {
-  data: { label: string; value: number }[];
+  data: { label: string; value: number; note?: string }[];
   valueFormat?: ValueFormat;
   layout?: "horizontal" | "vertical";
 }
@@ -36,7 +36,10 @@ export function FlatBarChart({ data, valueFormat = "number", layout = "vertical"
           </>
         )}
         <Tooltip
-          formatter={(value: unknown) => formatValue(Number(value), valueFormat)}
+          formatter={(value: unknown, _name: unknown, item: { payload?: { note?: string } }) => {
+            const formatted = formatValue(Number(value), valueFormat);
+            return item?.payload?.note ? `${formatted} (${item.payload.note})` : formatted;
+          }}
           contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         />
         <Bar dataKey="value" fill={seriesPrimary} radius={4} isAnimationActive={false} />

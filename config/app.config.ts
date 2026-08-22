@@ -13,6 +13,7 @@ export const appConfig = {
     { href: "/financial-insights", label: "Financial Insights" },
     { href: "/bu-role-demographics", label: "BU & Role Demographics" },
     { href: "/efficiency-velocity", label: "Efficiency & Velocity" },
+    { href: "/admin", label: "Admin" },
   ],
 
   /** Sheets API data is cached this long before Next.js revalidates it. */

@@ -28,8 +28,9 @@ export default async function FinancialInsightsPage({
   }));
   const byBU = totalInvestmentByBU(filtered).map((g) => ({ label: g.key, value: g.total }));
   const byRole = costPerHireByRole(filtered).map((g) => ({
-    label: `${g.key} (n=${g.count})`,
+    label: g.key,
     value: g.avg,
+    note: `n=${g.count}`,
   }));
   const trend = costPerHireTrend(filtered).map((p) => ({ period: p.month, value: p.value }));
 
